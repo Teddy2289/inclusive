@@ -22,3 +22,12 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/storage/*.log
+/storage/*.cache
+/storage/*.tmp
+/storage/*.bak
+/storage/*.old
+/storage/*.backup
+/storage/*.swp
+/storage/*.swo
+package-lock.json

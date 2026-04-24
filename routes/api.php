@@ -8,6 +8,7 @@ use App\Enums\ContactStatut;
 use App\Enums\PartenaireStatut;
 use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\UserController;
 
 // ─── Public ───────────────────────────────────────────────
 Route::post('/login',    [AuthController::class, 'login']);
@@ -53,4 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/imports', [DashboardController::class, 'imports']);
     Route::get('/dashboard/sync-status', [DashboardController::class, 'syncStatus']);
+
+    // Users management
+    Route::apiResource('users', UserController::class);
+    Route::get('roles', [UserController::class, 'getRoles']);
+    Route::get('permissions', [UserController::class, 'getPermissions']);
 });

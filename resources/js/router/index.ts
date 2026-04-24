@@ -48,6 +48,12 @@ const routes = [
                 name: "contacts.index",
                 component: () => import("@/pages/contacts/ContactsPage.vue"),
             },
+            {
+                path: "users",
+                name: "users.index",
+                component: () => import("@/pages/users/UsersPage.vue"),
+                meta: { requiresAuth: true, permission: "users.manage" },
+            },
         ],
     },
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PartenaireController;
 use App\Enums\ContactStatut;
 use App\Enums\PartenaireStatut;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\RolePermissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 
@@ -59,4 +60,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::get('roles', [UserController::class, 'getRoles']);
     Route::get('permissions', [UserController::class, 'getPermissions']);
+
+     // Rôles
+    Route::get('/roles',                [RolePermissionController::class, 'indexRoles']);
+    Route::get('/roles/{role}',         [RolePermissionController::class, 'showRole']);
+    Route::post('/roles',               [RolePermissionController::class, 'storeRole']);
+    Route::put('/roles/{role}',         [RolePermissionController::class, 'updateRole']);
+    Route::delete('/roles/{role}',      [RolePermissionController::class, 'destroyRole']);
+
+    // Permissions
+    Route::get('/permissions',                      [RolePermissionController::class, 'indexPermissions']);
+    Route::get('/permissions/{permission}',         [RolePermissionController::class, 'showPermission']);
+    Route::post('/permissions',                     [RolePermissionController::class, 'storePermission']);
+    Route::put('/permissions/{permission}',         [RolePermissionController::class, 'updatePermission']);
+    Route::delete('/permissions/{permission}',      [RolePermissionController::class, 'destroyPermission']);
 });

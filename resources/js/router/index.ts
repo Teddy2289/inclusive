@@ -54,6 +54,16 @@ const routes = [
                 component: () => import("@/pages/users/UsersPage.vue"),
                 meta: { requiresAuth: true, permission: "users.manage" },
             },
+            {
+                path: "roles",
+                name: "roles.index",
+                component: () => import("@/pages/RolesPermissions/Rolesview.vue"),
+            },
+            {
+                path: "permissions",
+                name: "permissions.index",
+                component: () => import("@/pages/RolesPermissions/Permissionsview.vue"),
+            },
         ],
     },
 

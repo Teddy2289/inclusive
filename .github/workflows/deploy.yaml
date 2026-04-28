@@ -26,7 +26,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PASSWORD  }}
           source: "public/build"
           target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public"
 
@@ -35,7 +35,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PASSWORD }}
           script: |
             sudo su -s /bin/bash contact -c "
               cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive &&

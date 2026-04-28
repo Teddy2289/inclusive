@@ -18,7 +18,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
-
+            echo "Pulling latest code and deploying..."
             # Mise à jour du code
             git pull origin main
 

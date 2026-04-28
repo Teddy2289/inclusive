@@ -72,12 +72,12 @@ class PartenairesImport implements ToCollection
             'adresse'  => $find(['ADRESSE']) ?: 5,
             'cp'       => $find(['CP', 'POSTAL']) ?: 6,
             'ville'    => $find(['VILLE']) ?: 7,
-            'salaries' => $find(['SALARI', 'NBRS']) ?: 8,
-            'secteur'  => $find(['SECTEUR']) ?: 9,
-            'tel1' => $find(['TEL 1', 'TELEPHONE 1', 'TEL1']) ?: 10,
-            'tel2' => $find(['TEL 2', 'TELEPHONE 2', 'TEL2']) ?: 11,
-            'ca'       => $find(['CA', 'CHIFFRE']) ?: 12,
-            'siret'    => $find(['SIRET']) ?: 13,
+            'tel1'     => $find(['TELEPHONE 1', 'TEL 1', 'TEL1']) ?: 8,
+            'tel2'     => $find(['TELEPHONE 2', 'TEL 2', 'TEL2']) ?: 9,
+            'salaries' => $find(['SALARI', 'NBRS', 'NBRE']) ?: 10,
+            'secteur'  => $find(['SECTEUR']) ?: 11,
+            'siret'    => $find(['SIRET']) ?: 12,
+            'ca'       => $find(['CA', 'CHIFFRE']) ?: 13,
         ];
     }
 

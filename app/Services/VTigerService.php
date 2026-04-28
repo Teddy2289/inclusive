@@ -157,7 +157,7 @@ class VTigerService
         ]);
 
         $result = $response->json();
-        \Log::info('vTiger getAccounts', ['success' => $result['success'] ?? false]);
+        Log::info('vTiger getAccounts', ['success' => $result['success'] ?? false]);
 
         return $result['result'] ?? [];
     }

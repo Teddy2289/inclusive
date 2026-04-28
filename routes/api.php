@@ -74,4 +74,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/permissions',                     [RolePermissionController::class, 'storePermission']);
     Route::put('/permissions/{permission}',         [RolePermissionController::class, 'updatePermission']);
     Route::delete('/permissions/{permission}',      [RolePermissionController::class, 'destroyPermission']);
+
+    Route::get('/crm/accounts', [App\Http\Controllers\Api\CrmController::class, 'accounts']);
 });

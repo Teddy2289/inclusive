@@ -26,52 +26,48 @@ class SyncToVTiger implements ShouldQueue
     {
         Log::info('SyncToVTiger démarré pour partenaire ' . $this->partenaire->id);
 
-        // 1. Chercher si le compte existe déjà dans vTiger
-        $existingId = $vtiger->findAccountByName($this->partenaire->raison_sociale);
+        // 1. Chercher si le prospect existe déjà dans vTiger
+        $existingId = $vtiger->findLeadByName($this->partenaire->raison_sociale);
 
         if ($existingId) {
-            // Compte déjà présent → on sauvegarde juste l'ID
-            Log::info('Compte vTiger existant trouvé : ' . $existingId);
+            Log::info('Prospect vTiger existant trouvé : ' . $existingId);
             $this->partenaire->update(['vtiger_id' => $existingId]);
-            $accountId = $existingId;
+            $leadId = $existingId;
         } else {
-            // Compte absent → on crée
-            $account = $vtiger->createAccount([
+            // Prospect absent → on crée
+            $lead = $vtiger->createLead([
                 'raison_sociale'   => $this->partenaire->raison_sociale,
                 'adresse'          => $this->partenaire->adresse,
                 'cp'               => $this->partenaire->cp,
                 'ville'            => $this->partenaire->ville,
                 'telephone_1'      => $this->partenaire->telephone_1,
                 'telephone_2'      => $this->partenaire->telephone_2,
-                'siret'            => $this->partenaire->siret,
                 'nbrs_salaries'    => $this->partenaire->nbrs_salaries,
                 'secteur_activite' => $this->partenaire->secteur_activite,
                 'ca'               => $this->partenaire->ca,
             ]);
 
-            Log::info('Réponse vTiger createAccount', (array)$account);
-
-            if (!isset($account['id'])) {
-                Log::error('Échec création vTiger pour partenaire ' . $this->partenaire->id);
+            if (!isset($lead['id'])) {
+                Log::error('Échec création prospect vTiger pour partenaire ' . $this->partenaire->id);
                 return;
             }
 
-            $this->partenaire->update(['vtiger_id' => $account['id']]);
-            $accountId = $account['id'];
+            $this->partenaire->update(['vtiger_id' => $lead['id']]);
+            $leadId = $lead['id'];
         }
 
-        // 2. Sync contacts
-        foreach ($this->partenaire->contacts()->where('is_synced_vtiger', false)->get() as $contact) {
-            $vtContact = $vtiger->createContact([
-                'prenom'       => $contact->conseiller_prenom,
-                'nom'          => $contact->conseiller_nom,
-                'telephone'    => $this->partenaire->telephone_1,
-                'commentaires' => $contact->commentaires,
-            ], $accountId);
+        // 2. Sync contacts liés
+        // foreach ($this->partenaire->contacts()->where('is_synced_vtiger', false)->get() as $contact) {
+        //     $vtContact = $vtiger->createContact([
+        //         'prenom'       => $contact->conseiller_prenom,
+        //         'nom'          => $contact->conseiller_nom,
+        //         'telephone'    => $this->partenaire->telephone_1,
+        //         'commentaires' => $contact->commentaires,
+        //     ], $leadId);
 
-            if (isset($vtContact['id'])) {
-                $contact->update(['is_synced_vtiger' => true]);
-            }
-        }
+        //     if (isset($vtContact['id'])) {
+        //         $contact->update(['is_synced_vtiger' => true]);
+        //     }
+        // }
     }
 }

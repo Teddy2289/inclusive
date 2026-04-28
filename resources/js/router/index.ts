@@ -57,12 +57,19 @@ const routes = [
             {
                 path: "roles",
                 name: "roles.index",
-                component: () => import("@/pages/RolesPermissions/Rolesview.vue"),
+                component: () =>
+                    import("@/pages/RolesPermissions/Rolesview.vue"),
             },
             {
                 path: "permissions",
                 name: "permissions.index",
-                component: () => import("@/pages/RolesPermissions/Permissionsview.vue"),
+                component: () =>
+                    import("@/pages/RolesPermissions/Permissionsview.vue"),
+            },
+            {
+                path: "crm/comptes",
+                name: "crm.accounts",
+                component: () => import("@/pages/crm/CrmAccountsPage.vue"),
             },
         ],
     },

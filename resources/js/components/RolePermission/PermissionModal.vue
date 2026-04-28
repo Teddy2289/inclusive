@@ -25,10 +25,7 @@
                         placeholder="ex: partenaires.create, contacts.edit..."
                     />
                     <span v-if="errors.name" class="form-error">{{ errors.name }}</span>
-                    <p class="form-hint">
-                        Convention recommandée : <code>ressource.action</code>
-                        (ex : <code>partenaires.view</code>, <code>users.delete</code>)
-                    </p>
+
                 </div>
 
                 <!-- Aperçu du formatage -->

@@ -52,7 +52,7 @@ class PartenaireController extends Controller
         if ($partenaire->vtiger_id) {
             try {
                 $success = app(\App\Services\VTigerService::class)
-                    ->deactivateAccount($partenaire->vtiger_id);
+                    ->deactivateLead($partenaire->vtiger_id);
 
                 Log::info('Désactivation vTiger', [
                     'partenaire_id' => $id,

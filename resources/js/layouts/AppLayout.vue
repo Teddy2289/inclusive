@@ -75,6 +75,13 @@
                     </svg>
                     <span class="nav-text">Permissions</span>
                 </RouterLink>
+                       <RouterLink to="crm/comptes" class="nav-item" active-class="active">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="nav-text">Listes des comptes</span>
+                </RouterLink>
                 <!-- Séparateur -->
                 <div class="nav-divider" v-if="!isCollapsed"></div>
 
@@ -567,6 +574,7 @@ onUnmounted(() => {
     margin-left: 280px;
     flex: 1;
     padding: 2rem;
+    background: whitesmoke;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

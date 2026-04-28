@@ -26,7 +26,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
           source: "public/build"
           target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public"
 
@@ -35,12 +35,14 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
-            git pull origin main
-            /usr/bin/php8.3 artisan migrate --force
-            /usr/bin/php8.3 artisan config:clear
-            /usr/bin/php8.3 artisan cache:clear
-            /usr/bin/php8.3 artisan view:clear
-            /usr/bin/php8.3 artisan queue:restart
+            sudo su -s /bin/bash contact -c "
+              cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive &&
+              git pull origin main &&
+              /usr/bin/php8.3 artisan migrate --force &&
+              /usr/bin/php8.3 artisan config:clear &&
+              /usr/bin/php8.3 artisan cache:clear &&
+              /usr/bin/php8.3 artisan view:clear &&
+              /usr/bin/php8.3 artisan queue:restart
+            "

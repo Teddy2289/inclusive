@@ -30,6 +30,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           source: "public/build"
           target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public"
+          strip_components: 2
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0

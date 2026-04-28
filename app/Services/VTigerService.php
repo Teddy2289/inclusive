@@ -162,6 +162,7 @@ class VTigerService
         return $result['result'] ?? [];
     }
 
+    // Méthode pour compter le total des comptes (pour la pagination)
     public function countAccounts(string $search = ''): int
     {
         if (!$this->sessionName) $this->login();

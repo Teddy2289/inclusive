@@ -2,7 +2,7 @@ name: Deploy to Hestia
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   deploy:
@@ -14,7 +14,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Build assets
         run: |
@@ -26,7 +26,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PASSWORD  }}
+          password: ${{ secrets.SSH_PASSWORD }}
           source: "public/build"
           target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public"
 
@@ -35,7 +35,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PASSWORD }}
+          password: ${{ secrets.SSH_PASSWORD }}
           script: |
             sudo su -s /bin/bash contact -c "
               cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive &&

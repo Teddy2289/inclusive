@@ -52,7 +52,7 @@ jobs:
               git reset --hard origin/main
 
               echo "=== Composer ==="
-              /usr/bin/php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
+              /usr/bin/php8.3 /usr/bin/composer install --no-dev --optimize-autoloader --no-interaction
 
               echo "=== Laravel ==="
               /usr/bin/php8.3 artisan migrate --force

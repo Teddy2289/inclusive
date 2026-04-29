@@ -12,12 +12,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload build via SFTP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}        # contact
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          source: "public/build/"
+          target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public/"
+          overwrite: true
+          strip_components: 1
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
+          username: ${{ secrets.SSH_ADMIN_USER }}      # mbl
+          password: ${{ secrets.SSH_ADMIN_PASSWORD }}
           port: 22
           script: |
             set -e
@@ -27,15 +49,9 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
-            echo "=== Node build ==="
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            node -v
-            npm ci
-            npm run build
-
             echo "=== Composer ==="
-            /usr/bin/php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
+            /usr/bin/php8.3 /usr/local/bin/composer install \
+              --no-dev --optimize-autoloader --no-interaction
 
             echo "=== Laravel ==="
             /usr/bin/php8.3 artisan migrate --force
@@ -45,6 +61,7 @@ jobs:
             /usr/bin/php8.3 artisan queue:restart
 
             echo "=== Permissions ==="
+            chown -R contact:contact public/build
             chmod -R 775 storage bootstrap/cache public/build
 
             echo "=== Deploy OK ==="

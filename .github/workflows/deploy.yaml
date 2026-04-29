@@ -42,6 +42,10 @@ jobs:
           port: 22
           script: |
             set -e
+
+            git config --global --add safe.directory \
+              /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
+
             cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
 
             echo "=== Git pull ==="

@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'vtiger' => [
+        'url'        => env('CRM_URL'),
+        'username'   => env('CRM_USERNAME'),
+        'access_key' => env('CRM_ACCESS_KEY'),
+    ],
 
 ];

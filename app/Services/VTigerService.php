@@ -14,9 +14,9 @@ class VTigerService
 
     public function __construct()
     {
-        $this->url = env('CRM_URL');
-        $this->username = env('CRM_USERNAME');
-        $this->accessKey = env('CRM_ACCESS_KEY');
+        $this->url = config('services.vtiger.url');
+        $this->username = config('services.vtiger.username');
+        $this->accessKey = config('services.vtiger.access_key');
     }
     protected function login()
     {

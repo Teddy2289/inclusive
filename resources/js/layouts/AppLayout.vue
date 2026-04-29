@@ -14,16 +14,7 @@
 
             <!-- Logo -->
             <div class="sidebar__logo">
-                <div class="logo-icon">
-                    <svg class="logo-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </div>
-                <div class="logo-text">
-                    <span class="logo-title">Inclusive</span>
-                    <span class="logo-subtitle">Support</span>
-                </div>
+               <img :src="logo" alt="Logo" class="logo-icon" />
             </div>
 
             <!-- Navigation -->
@@ -147,6 +138,8 @@ import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { partenaireService } from "@/services/partenaireService";
 import { contactService } from "@/services/contactService";
+import logo from '@/assets/logo_2.png'
+
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -294,9 +287,10 @@ onUnmounted(() => {
 }
 
 .logo-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    background: linear-gradient(135deg, #ff6b35 0%, #ff6b35 100%);
+    width: 100%;
+    object-fit: cover;
+    height: 60px;
+    background: white;
     border-radius: 0.75rem;
     display: flex;
     align-items: center;

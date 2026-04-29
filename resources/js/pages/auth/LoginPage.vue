@@ -5,44 +5,7 @@
       <div class="brand-section">
         <div class="brand-content">
           <div class="logo">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="48" height="48" rx="12" fill="url(#logoGradient)"/>
-              <path d="M24 14L27.5 21H20.5L24 14Z" fill="white" fill-opacity="0.9"/>
-              <path d="M24 34L20.5 27H27.5L24 34Z" fill="white" fill-opacity="0.6"/>
-              <path d="M15 21L22 24.5L15 28V21Z" fill="white" fill-opacity="0.8"/>
-              <path d="M33 21L26 24.5L33 28V21Z" fill="white" fill-opacity="0.8"/>
-              <defs>
-                <linearGradient id="logoGradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#0a1628"/>
-                  <stop offset="1" stop-color="#0a1628"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <span class="logo-text">Poratl Import</span>
-          </div>
-          <h2 class="brand-title">Bienvenue</h2>
-          <p class="brand-description">
-            Connectez-vous pour accéder à votre espace de travail et gérer vos activités efficacement.
-          </p>
-          <div class="features-list">
-            <div class="feature">
-              <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              <span>Gestion simplifiée</span>
-            </div>
-            <div class="feature">
-              <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              <span>Sécurité renforcée</span>
-            </div>
-            <div class="feature">
-              <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              <span>Support 24/7</span>
-            </div>
+            <img :src="logo" alt="Logo" class="logo-image" />
           </div>
         </div>
       </div>
@@ -144,7 +107,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-
+import logo from '@/assets/logo_2.png'
 const auth = useAuthStore()
 const router = useRouter()
 const loading = ref(false)
@@ -183,7 +146,7 @@ async function handleLogin(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1c1a1f;
+  background: #f38945;
   padding: 1rem;
 }
 
@@ -200,7 +163,7 @@ async function handleLogin(): Promise<void> {
 /* Section Branding */
 .brand-section {
   flex: 1;
-  background:#ff6b35;
+  background:#cacaca;
   padding: 3rem;
   display: flex;
   align-items: center;
@@ -208,16 +171,7 @@ async function handleLogin(): Promise<void> {
   overflow: hidden;
 }
 
-.brand-section::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-  animation: rotate 20s linear infinite;
-}
+
 
 @keyframes rotate {
   from {
@@ -237,6 +191,7 @@ async function handleLogin(): Promise<void> {
 .logo {
   display: flex;
   align-items: center;
+  object-fit: cover;
   gap: 0.75rem;
   margin-bottom: 3rem;
 }

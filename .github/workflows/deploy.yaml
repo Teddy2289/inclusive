@@ -12,27 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
-
-      - name: Copy build to server
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: 22
-          source: "public/build/"
-          target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public/build/"
-          overwrite: true
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -46,10 +25,14 @@ jobs:
 
             echo "=== Git pull ==="
             git fetch origin main
-            git checkout -- public/build
             git reset --hard origin/main
-            # Restore the freshly uploaded build assets that git just overwrote
-            git checkout -- public/build 2>/dev/null || true
+
+            echo "=== Node build ==="
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            node -v
+            npm ci
+            npm run build
 
             echo "=== Composer ==="
             /usr/bin/php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction

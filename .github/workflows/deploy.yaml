@@ -17,17 +17,22 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
+            set -e
             cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
-            echo "Pulling latest code and deploying..."
-            # Mise à jour du code
-            git pull origin main
 
-            # Installation et Build directement sur le serveur
-            npm install
+            echo "=== Reset et pull ==="
+            git fetch origin main
+            git reset --hard origin/main    # ← force l'écrasement des fichiers locaux
+
+            echo "=== NPM build ==="
+            npm ci
             npm run build
 
-            # Laravel commands
+            echo "=== Laravel ==="
             /usr/bin/php8.3 artisan migrate --force
             /usr/bin/php8.3 artisan config:cache
+            /usr/bin/php8.3 artisan route:cache
             /usr/bin/php8.3 artisan view:clear
             /usr/bin/php8.3 artisan queue:restart
+
+            echo "=== Deploy OK ==="

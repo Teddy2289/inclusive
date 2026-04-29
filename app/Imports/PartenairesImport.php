@@ -13,8 +13,10 @@ class PartenairesImport implements ToCollection
     public function collection(Collection $rows)
     {
         // Chercher la ligne d'en-tête — soit avec RAISON col 4, soit avec RAISON col E
-        $header = $rows->first(fn($row) =>
-            collect($row)->contains(fn($val) =>
+        $header = $rows->first(
+            fn($row) =>
+            collect($row)->contains(
+                fn($val) =>
                 str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
             )
         );
@@ -25,16 +27,18 @@ class PartenairesImport implements ToCollection
 
         foreach ($rows as $row) {
             // Sauter les lignes d'en-tête
-            if (collect($row)->contains(fn($val) =>
+            if (collect($row)->contains(
+                fn($val) =>
                 str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
             )) {
                 continue;
             }
 
             // Sauter les lignes de titre fusionné type "Infos générales"
-            if (collect($row)->contains(fn($val) =>
+            if (collect($row)->contains(
+                fn($val) =>
                 str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'INFOS') ||
-                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'GÉNÉRAL')
+                    str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'GÉNÉRAL')
             )) {
                 continue;
             }
@@ -50,7 +54,6 @@ class PartenairesImport implements ToCollection
             }
 
             $siret = $this->cleanSiret($row[$map['siret']] ?? null);
-
             $partenaire = Partenaire::updateOrCreate(
                 ['siret' => $siret],
                 [
@@ -115,9 +118,20 @@ class PartenairesImport implements ToCollection
         $ca       = $find(['CA', 'CHIFFRE'])                           ?: 13;
 
         return compact(
-            'conseiller', 'etat', 'date', 'commentaires',
-            'raison', 'adresse', 'cp', 'ville',
-            'tel1', 'tel2', 'salaries', 'secteur', 'siret', 'ca'
+            'conseiller',
+            'etat',
+            'date',
+            'commentaires',
+            'raison',
+            'adresse',
+            'cp',
+            'ville',
+            'tel1',
+            'tel2',
+            'salaries',
+            'secteur',
+            'siret',
+            'ca'
         );
     }
 

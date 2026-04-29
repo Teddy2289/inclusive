@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -186,35 +187,23 @@ class VTigerService
 
     public function deleteAllLeads(): int
     {
-        $this->login();
-        $offset  = 0;
-        $deleted = 0;
+        // 1. Compter avant suppression
+        $count = DB::connection('vtiger')->table('vtiger_leaddetails')->count();
 
-        do {
-            $response = Http::withoutVerifying()->get($this->url, [
-                'operation'   => 'query',
-                'sessionName' => $this->sessionName,
-                'query'       => "SELECT id FROM Leads LIMIT $offset, 100;",
-            ]);
+        // 2. Supprimer via SQL direct
+        DB::connection('vtiger')->statement('SET FOREIGN_KEY_CHECKS = 0');
+        DB::connection('vtiger')->table('vtiger_leadaddress')->delete();
+        DB::connection('vtiger')->table('vtiger_leaddetails')->delete();
+        DB::connection('vtiger')->table('vtiger_leadscf')->delete();
+        DB::connection('vtiger')->table('vtiger_leadsubdetails')->delete();
+        DB::connection('vtiger')->table('vtiger_crmentity')->where('setype', 'Leads')->delete();
+        DB::connection('vtiger')->statement('SET FOREIGN_KEY_CHECKS = 1');
 
-            $records = $response->json('result') ?? [];
-            if (empty($records)) break;
-
-            foreach ($records as $record) {
-                Http::withoutVerifying()->asForm()->post($this->url, [
-                    'operation'   => 'delete',
-                    'sessionName' => $this->sessionName,
-                    'id'          => $record['id'],
-                ]);
-                $deleted++;
-            }
-
-            $offset += 100;
-        } while (count($records) === 100);
-
+        // 3. Remettre vtiger_id à null localement
         \App\Models\Partenaire::query()->update(['vtiger_id' => null]);
+        \App\Models\Contact::query()->forceDelete();
 
-        return $deleted;
+        return $count;
     }
 
     public function createContact(array $data, string $leadId): array

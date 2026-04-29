@@ -2,24 +2,50 @@
 
 namespace App\Imports;
 
+use App\Enums\ContactStatut;
 use App\Models\Contact;
 use App\Models\Partenaire;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
-
 class PartenairesImport implements ToCollection
 {
     public function collection(Collection $rows)
     {
-        $header = $rows->first(fn($row) => str_contains(strtoupper($row[4] ?? ''), 'RAISON'));
+        // Chercher la ligne d'en-tête — soit avec RAISON col 4, soit avec RAISON col E
+        $header = $rows->first(fn($row) =>
+            collect($row)->contains(fn($val) =>
+                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
+            )
+        );
 
         if (!$header) return;
 
         $map = $this->mapColumns($header);
 
-        foreach ($rows as $index => $row) {
-            if (str_contains(strtoupper($row[4] ?? ''), 'RAISON') || empty($row[$map['raison']])) {
+        foreach ($rows as $row) {
+            // Sauter les lignes d'en-tête
+            if (collect($row)->contains(fn($val) =>
+                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
+            )) {
+                continue;
+            }
+
+            // Sauter les lignes de titre fusionné type "Infos générales"
+            if (collect($row)->contains(fn($val) =>
+                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'INFOS') ||
+                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'GÉNÉRAL')
+            )) {
+                continue;
+            }
+
+            // Sauter si pas de raison sociale
+            if (empty($row[$map['raison']])) {
+                continue;
+            }
+
+            // Sauter si colonne Etat contient le titre
+            if (isset($row[$map['etat']]) && in_array($row[$map['etat']], ['Etat', 'statut', 'État'])) {
                 continue;
             }
 
@@ -28,33 +54,34 @@ class PartenairesImport implements ToCollection
             $partenaire = Partenaire::updateOrCreate(
                 ['siret' => $siret],
                 [
-                    'raison_sociale'   => $row[$map['raison']],
-                    'adresse'          => $row[$map['adresse']] ?? null,
-                    'cp'               => $row[$map['cp']] ?? null,
-                    'ville'            => $row[$map['ville']] ?? null,
+                    'raison_sociale'   => $this->truncate($row[$map['raison']] ?? null, 255),
+                    'adresse'          => $this->truncate($row[$map['adresse']] ?? null, 255),
+                    'cp'               => $this->truncate($row[$map['cp']] ?? null, 10),
+                    'ville'            => $this->truncate($row[$map['ville']] ?? null, 255),
                     'nbrs_salaries'    => $this->toNum($row[$map['salaries']] ?? null),
-                    'secteur_activite' => $row[$map['secteur']] ?? null,
-                    'telephone_1'      => $row[$map['tel1']] ?? null,
-                    'telephone_2'      => $row[$map['tel2']] ?? null,
+                    'secteur_activite' => $this->truncate($row[$map['secteur']] ?? null, 255),
+                    'telephone_1'      => $this->truncate($row[$map['tel1']] ?? null, 20),
+                    'telephone_2'      => $this->truncate($row[$map['tel2']] ?? null, 20),
                     'ca'               => $this->toNum($row[$map['ca']] ?? null),
                 ]
             );
 
-            if (!empty($row[0]) || !empty($row[1])) {
-                $conseiller = $this->parseConseiller($row[0]);
+            // Créer le contact si conseiller ou etat présent
+            $hasConseiller = !empty($row[$map['conseiller'] ?? 0]);
+            $hasEtat       = !empty($row[$map['etat'] ?? 1]);
+
+            if ($hasConseiller || $hasEtat) {
+                $conseiller = $this->parseConseiller($row[$map['conseiller'] ?? 0] ?? null);
                 Contact::create([
-                    'partenaire_id'     => $partenaire->id,
-                    'conseiller_nom'    => $conseiller['nom'],
-                    'conseiller_prenom' => $conseiller['prenom'],
-                    'etat'              => $row[1] ?? null,
-                    'date_premier_contact' => $this->parseDate($row[2] ?? null),
-                    'commentaires'      => $row[3] ?? null,
+                    'partenaire_id'        => $partenaire->id,
+                    'conseiller_nom'       => $conseiller['nom'],
+                    'conseiller_prenom'    => $conseiller['prenom'],
+                    'statut'               => $row[$map['etat'] ?? 1] ?? ContactStatut::A_CONTACTER->value,
+                    'date_premier_contact' => $this->parseDate($row[$map['date'] ?? 2] ?? null),
+                    'commentaires'         => $row[$map['commentaires'] ?? 3] ?? null,
                 ]);
             }
 
-
-            // On ajoute afterCommit() pour être sûr que les contacts sont créés en base
-            // avant que le job ne commence à chercher dans vTiger
             \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
         }
     }
@@ -62,23 +89,44 @@ class PartenairesImport implements ToCollection
     private function mapColumns($header): array
     {
         $header = $header->toArray();
+
         $find = fn($needles) => collect($header)->search(
-            fn($val) =>
-            collect($needles)->contains(fn($n) => str_contains(mb_strtoupper((string)$val, 'UTF-8'), $n))
+            fn($val) => collect($needles)->contains(
+                fn($n) => str_contains(mb_strtoupper((string)$val, 'UTF-8'), $n)
+            )
         );
 
-        return [
-            'raison'   => $find(['RAISON', 'SOCIALE']) ?: 4,
-            'adresse'  => $find(['ADRESSE']) ?: 5,
-            'cp'       => $find(['CP', 'POSTAL']) ?: 6,
-            'ville'    => $find(['VILLE']) ?: 7,
-            'tel1'     => $find(['TELEPHONE 1', 'TEL 1', 'TEL1']) ?: 8,
-            'tel2'     => $find(['TELEPHONE 2', 'TEL 2', 'TEL2']) ?: 9,
-            'salaries' => $find(['SALARI', 'NBRS', 'NBRE']) ?: 10,
-            'secteur'  => $find(['SECTEUR']) ?: 11,
-            'siret'    => $find(['SIRET']) ?: 12,
-            'ca'       => $find(['CA', 'CHIFFRE']) ?: 13,
-        ];
+        // Colonnes gauche (conseiller/etat) — toujours col 0,1,2,3
+        $conseiller  = $find(['CONSEIL']) !== false ? $find(['CONSEIL'])  : 0;
+        $etat        = $find(['ETAT', 'ÉTAT', 'STATUT']) !== false ? $find(['ETAT', 'ÉTAT', 'STATUT']) : 1;
+        $date        = $find(['DATE', '1ER', 'PREMIER']) !== false ? $find(['DATE', '1ER', 'PREMIER']) : 2;
+        $commentaires = $find(['COMMENT', 'SITUATION']) !== false ? $find(['COMMENT', 'SITUATION']) : 3;
+
+        // Colonnes droite (infos entreprise)
+        $raison   = $find(['RAISON', 'SOCIALE'])                       ?: 4;
+        $adresse  = $find(['ADRESSE'])                                  ?: 5;
+        $cp       = $find(['CP', 'CODE POSTAL'])                       ?: 6;
+        $ville    = $find(['VILLE'])                                    ?: 7;
+        $tel1     = $find(['TÉLÉPHONE 1', 'TELEPHONE 1', 'TEL 1', 'TEL1']) ?: 8;
+        $tel2     = $find(['TÉLÉPHONE 2', 'TELEPHONE 2', 'TEL 2', 'TEL2']) ?: 9;
+        $salaries = $find(['SALARI', 'NBRS', 'NBRE'])                  ?: 10;
+        $secteur  = $find(['SECTEUR'])                                  ?: 11;
+        $siret    = $find(['SIRET'])                                    ?: 12;
+        $ca       = $find(['CA', 'CHIFFRE'])                           ?: 13;
+
+        return compact(
+            'conseiller', 'etat', 'date', 'commentaires',
+            'raison', 'adresse', 'cp', 'ville',
+            'tel1', 'tel2', 'salaries', 'secteur', 'siret', 'ca'
+        );
+    }
+
+    // ← NOUVEAU : tronquer les valeurs trop longues
+    private function truncate($value, int $max): ?string
+    {
+        if (is_null($value)) return null;
+        $str = trim((string)$value);
+        return mb_strlen($str) > $max ? mb_substr($str, 0, $max) : $str;
     }
 
     private function toNum($val)

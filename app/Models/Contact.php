@@ -11,11 +11,16 @@ class Contact extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'partenaire_id', 'conseiller_nom', 'conseiller_prenom',
-        'etat', 'date_premier_contact', 'commentaires',
-        'poste', 'tel',
-    ];
+protected $fillable = [
+    'partenaire_id',
+    'conseiller_nom',
+    'conseiller_prenom',
+    'statut',
+    'date_premier_contact',
+    'commentaires',
+    'poste',
+    'tel',
+];
 
     protected $casts = [
         'date_premier_contact' => 'date',

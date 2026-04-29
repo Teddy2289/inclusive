@@ -17,7 +17,6 @@ class StoreContactRequest extends FormRequest
             'conseiller_nom'       => 'nullable|string|max:100',
             'conseiller_prenom'    => 'nullable|string|max:100',
             'statut'               => ['nullable', new Enum(ContactStatut::class)],
-            'etat'                 => 'nullable|string|max:100',
             'date_premier_contact' => 'nullable|date',
             'commentaires'         => 'nullable|string',
             'poste'                => 'nullable|string|max:100',

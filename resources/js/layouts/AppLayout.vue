@@ -232,7 +232,7 @@ onUnmounted(() => {
 /* Sidebar */
 .sidebar {
     width: 280px;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, #1f1d22 0%, #1f1d22 100%);
     backdrop-filter: blur(10px);
     color: #fff;
     display: flex;
@@ -257,7 +257,7 @@ onUnmounted(() => {
     right: -0.75rem;
     width: 1.5rem;
     height: 1.5rem;
-    background: #0ea5e9;
+    background: #ff6b35;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -296,7 +296,7 @@ onUnmounted(() => {
 .logo-icon {
     width: 2.5rem;
     height: 2.5rem;
-    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #ff6b35 0%, #ff6b35 100%);
     border-radius: 0.75rem;
     display: flex;
     align-items: center;
@@ -363,7 +363,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #ff6b35 0%, #ff6b35b2 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: -1;
@@ -435,7 +435,7 @@ onUnmounted(() => {
 .stat-value {
     font-size: 1rem;
     font-weight: 700;
-    color: #0ea5e9;
+    color: #ff6b35;
 }
 
 .stat-label {
@@ -464,7 +464,7 @@ onUnmounted(() => {
     position: relative;
     width: 2.5rem;
     height: 2.5rem;
-    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #ff6b35 0%, #ff6b35 100%);
     border-radius: 0.75rem;
     display: flex;
     align-items: center;
@@ -544,7 +544,7 @@ onUnmounted(() => {
 }
 
 .action-btn.settings:hover {
-    background: #0ea5e9;
+    background: #ff6b35;
 }
 
 .action-btn.logout:hover {
@@ -592,7 +592,7 @@ onUnmounted(() => {
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-    background: #0ea5e9;
+    background: #ff6b35;
     border-radius: 4px;
 }
 

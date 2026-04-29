@@ -617,7 +617,7 @@
 }
 
 .btn-danger {
-    background: #ef4444;
+    background: #cf0909;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -637,7 +637,7 @@
 }
 
 .btn-sync {
-    background: #6366f1;
+    background: #ff6b35;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -648,7 +648,7 @@
 }
 
 .btn-sync:hover:not(:disabled) {
-    background: #4f46e5;
+    background: #dd4e0c;
 }
 
 .btn-sync:disabled {

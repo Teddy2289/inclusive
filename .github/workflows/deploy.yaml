@@ -10,10 +10,10 @@ jobs:
     environment: Workflows
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
@@ -22,17 +22,6 @@ jobs:
           npm ci
           npm run build
 
-      - name: Prepare server directories
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port: 22
-          script: |
-            mkdir -p /home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public/build
-            chmod -R 775 /home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public
-
       - name: Copy build to server
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -40,8 +29,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          source: "public/build"
-          target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public"
+          source: "public/build/"
+          target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public/build/"
           overwrite: true
 
       - name: Deploy via SSH
@@ -55,9 +44,12 @@ jobs:
             set -e
             cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
 
-            echo "=== Git reset + pull ==="
+            echo "=== Git pull ==="
             git fetch origin main
+            git checkout -- public/build
             git reset --hard origin/main
+            # Restore the freshly uploaded build assets that git just overwrote
+            git checkout -- public/build 2>/dev/null || true
 
             echo "=== Composer ==="
             /usr/bin/php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction

@@ -18,7 +18,7 @@
                 </linearGradient>
               </defs>
             </svg>
-            <span class="logo-text">Inclusive Support</span>
+            <span class="logo-text">Poratl Import</span>
           </div>
           <h2 class="brand-title">Bienvenue</h2>
           <p class="brand-description">

@@ -34,7 +34,6 @@ class SyncToVTiger implements ShouldQueue
             $this->partenaire->update(['vtiger_id' => $existingId]);
             $leadId = $existingId;
         } else {
-            // Prospect absent → on crée
             $lead = $vtiger->createLead([
                 'raison_sociale'   => $this->partenaire->raison_sociale,
                 'adresse'          => $this->partenaire->adresse,
@@ -56,18 +55,20 @@ class SyncToVTiger implements ShouldQueue
             $leadId = $lead['id'];
         }
 
-        // 2. Sync contacts liés
-        // foreach ($this->partenaire->contacts()->where('is_synced_vtiger', false)->get() as $contact) {
-        //     $vtContact = $vtiger->createContact([
-        //         'prenom'       => $contact->conseiller_prenom,
-        //         'nom'          => $contact->conseiller_nom,
-        //         'telephone'    => $this->partenaire->telephone_1,
-        //         'commentaires' => $contact->commentaires,
-        //     ], $leadId);
+        // 2. Sync contacts liés non encore synchronisés
+        foreach ($this->partenaire->contacts()->whereNull('vtiger_id')->get() as $contact) {
+            $vtContact = $vtiger->createContact([
+                'conseiller_nom'    => $contact->conseiller_nom,
+                'conseiller_prenom' => $contact->conseiller_prenom,
+                'tel'               => $contact->tel,
+                'poste'             => $contact->poste,
+                'commentaires'      => $contact->commentaires,
+            ], $leadId);
 
-        //     if (isset($vtContact['id'])) {
-        //         $contact->update(['is_synced_vtiger' => true]);
-        //     }
-        // }
+            if (isset($vtContact['id'])) {
+                $contact->update(['vtiger_id' => $vtContact['id']]);
+                Log::info('Contact vTiger créé : ' . $vtContact['id']);
+            }
+        }
     }
 }

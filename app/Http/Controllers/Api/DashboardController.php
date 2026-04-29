@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -6,6 +7,8 @@ use App\Models\Partenaire;
 use App\Models\Contact;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Services\VTigerService;
+
 
 class DashboardController extends Controller
 {
@@ -19,8 +22,8 @@ class DashboardController extends Controller
                 'deleted'      => Partenaire::onlyTrashed()->count(),
             ],
             'contacts' => [
-                'total'        => Contact::count(),
-                'synced'       => Contact::where('is_synced_vtiger', true)->count(),
+                'total'  => Contact::count(),
+                'synced' => Contact::whereNotNull('vtiger_id')->count(),
             ],
             'jobs' => [
                 'pending'  => DB::table('jobs')->count(),
@@ -39,6 +42,15 @@ class DashboardController extends Controller
             'percent'   => Partenaire::count() > 0
                 ? round((Partenaire::whereNotNull('vtiger_id')->count() / Partenaire::count()) * 100)
                 : 0,
+        ]);
+    }
+
+    public function clearCrm(VTigerService $vtiger): JsonResponse
+    {
+        $deleted = $vtiger->deleteAllLeads();
+        return response()->json([
+            'message' => "$deleted prospects supprimés du CRM",
+            'deleted' => $deleted,
         ]);
     }
 }

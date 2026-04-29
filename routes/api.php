@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('roles', [UserController::class, 'getRoles']);
     Route::get('permissions', [UserController::class, 'getPermissions']);
 
-     // Rôles
+    // Rôles
     Route::get('/roles',                [RolePermissionController::class, 'indexRoles']);
     Route::get('/roles/{role}',         [RolePermissionController::class, 'showRole']);
     Route::post('/roles',               [RolePermissionController::class, 'storeRole']);
@@ -76,4 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/permissions/{permission}',      [RolePermissionController::class, 'destroyPermission']);
 
     Route::get('/crm/accounts', [App\Http\Controllers\Api\CrmController::class, 'accounts']);
+
+    Route::post('/dashboard/clear-crm',  [DashboardController::class, 'clearCrm']);
+    Route::post('/dashboard/resync-all', [DashboardController::class, 'resyncAll']);
 });

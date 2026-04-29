@@ -183,4 +183,63 @@ class VTigerService
 
         return $response->json('result.0.count') ?? 0;
     }
+
+    public function deleteAllLeads(): int
+    {
+        $this->login();
+        $offset  = 0;
+        $deleted = 0;
+
+        do {
+            $response = Http::withoutVerifying()->get($this->url, [
+                'operation'   => 'query',
+                'sessionName' => $this->sessionName,
+                'query'       => "SELECT id FROM Leads LIMIT $offset, 100;",
+            ]);
+
+            $records = $response->json('result') ?? [];
+            if (empty($records)) break;
+
+            foreach ($records as $record) {
+                Http::withoutVerifying()->asForm()->post($this->url, [
+                    'operation'   => 'delete',
+                    'sessionName' => $this->sessionName,
+                    'id'          => $record['id'],
+                ]);
+                $deleted++;
+            }
+
+            $offset += 100;
+        } while (count($records) === 100);
+
+        \App\Models\Partenaire::query()->update(['vtiger_id' => null]);
+
+        return $deleted;
+    }
+
+    public function createContact(array $data, string $leadId): array
+    {
+        if (!$this->sessionName) $this->login();
+
+        $element = json_encode([
+            'lastname'         => $data['conseiller_nom']    ?? 'Inconnu',
+            'firstname'        => $data['conseiller_prenom'] ?? '',
+            'phone'            => $data['tel']               ?? '',
+            'title'            => $data['poste']             ?? '',
+            'description'      => $data['commentaires']      ?? '',
+            'assigned_user_id' => '19x1',
+        ]);
+
+        $response = Http::withoutVerifying()->asForm()->post($this->url, [
+            'operation'   => 'create',
+            'sessionName' => $this->sessionName,
+            'elementType' => 'Contacts',
+            'element'     => $element,
+        ]);
+
+        $result = $response->json();
+        Log::info('vTiger createContact response', (array)($result['result'] ?? $result));
+
+        return $result['result'] ?? [];
+    }
 }

@@ -20,6 +20,7 @@ protected $fillable = [
     'commentaires',
     'poste',
     'tel',
+    'vtiger_id',
 ];
 
     protected $casts = [

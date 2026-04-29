@@ -35,4 +35,14 @@ export const dashboardService = {
     const { data } = await api.get('/dashboard/sync-status')
     return data
   },
+
+    async clearCrm(): Promise<{ message: string; deleted: number }> {
+    const { data } = await api.post('/dashboard/clear-crm')
+    return data
+  },
+
+  async resyncAll(): Promise<{ message: string; dispatched: number }> {
+    const { data } = await api.post('/dashboard/resync-all')
+    return data
+  },
 }

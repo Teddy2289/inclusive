@@ -10,23 +10,46 @@ jobs:
     environment: Workflows
 
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy build to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          source: "public/build"
+          target: "/home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public"
+          overwrite: true
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
           script: |
             set -e
             cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
 
-            echo "=== Reset et pull ==="
+            echo "=== Git reset + pull ==="
             git fetch origin main
-            git reset --hard origin/main    # ← force l'écrasement des fichiers locaux
+            git reset --hard origin/main
 
-            echo "=== NPM build ==="
-            npm ci
-            npm run build
+            echo "=== Composer ==="
+            /usr/bin/php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
 
             echo "=== Laravel ==="
             /usr/bin/php8.3 artisan migrate --force
@@ -34,5 +57,8 @@ jobs:
             /usr/bin/php8.3 artisan route:cache
             /usr/bin/php8.3 artisan view:clear
             /usr/bin/php8.3 artisan queue:restart
+
+            echo "=== Permissions ==="
+            chmod -R 775 storage bootstrap/cache
 
             echo "=== Deploy OK ==="

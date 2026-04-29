@@ -43,32 +43,26 @@ jobs:
           script: |
             set -e
 
-            git config --global --add safe.directory \
-              /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
+            sudo -u contact bash -c '
+              set -e
+              cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
 
-            cd /home/contact/web/inclusiv.allopro24.com/public_html/inclusive
+              echo "=== Git pull ==="
+              git fetch origin main
+              git reset --hard origin/main
 
-            echo "=== Git pull ==="
-            git fetch origin main
-            git reset --hard origin/main
+              echo "=== Composer ==="
+              /usr/bin/php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
 
-            echo "=== Composer ==="
-            /usr/bin/php8.3 /usr/local/bin/composer install \
-              --no-dev --optimize-autoloader --no-interaction
+              echo "=== Laravel ==="
+              /usr/bin/php8.3 artisan migrate --force
+              /usr/bin/php8.3 artisan config:cache
+              /usr/bin/php8.3 artisan route:cache
+              /usr/bin/php8.3 artisan view:clear
+              /usr/bin/php8.3 artisan queue:restart
 
-            echo "=== Laravel ==="
-            /usr/bin/php8.3 artisan migrate --force
-            /usr/bin/php8.3 artisan config:cache
-            /usr/bin/php8.3 artisan route:cache
-            /usr/bin/php8.3 artisan view:clear
-            /usr/bin/php8.3 artisan queue:restart
+              echo "=== Permissions ==="
+              chmod -R 775 storage bootstrap/cache public/build
 
-            echo "=== Permissions ==="
-            chown -R contact:contact \
-              /home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public/build
-            chmod -R 775 \
-              /home/contact/web/inclusiv.allopro24.com/public_html/inclusive/storage \
-              /home/contact/web/inclusiv.allopro24.com/public_html/inclusive/bootstrap/cache \
-              /home/contact/web/inclusiv.allopro24.com/public_html/inclusive/public/build
-
-            echo "=== Deploy OK ==="
+              echo "=== Deploy OK ==="
+            '

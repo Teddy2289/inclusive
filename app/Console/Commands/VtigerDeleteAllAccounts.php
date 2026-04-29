@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Http;
 
 class VtigerDeleteAllAccounts extends Command
 {
-    protected $signature   = 'vtiger:delete-all-accounts';
-    protected $description = 'Supprime tous les comptes dans vTiger CRM';
+    protected $signature   = 'vtiger:delete-all-leads';
+    protected $description = 'Supprime tous les Prospects (Leads) dans vTiger CRM';
 
     public function handle()
     {
-        $url       = 'https://crm.allopro24.com/webservice.php';
-        $username  = 'admin';
-        $accessKey = 'jjwbgscPe3qmW4oq';
+        $url       = config('services.vtiger.url');
+        $username  = config('services.vtiger.username');
+        $accessKey = config('services.vtiger.access_key');
 
         // 1. Login
         $token = Http::withoutVerifying()
@@ -31,7 +31,7 @@ class VtigerDeleteAllAccounts extends Command
 
         $this->info("Session: $session");
 
-        // 2. Récupérer tous les IDs par batch de 100
+        // 2. Récupérer et supprimer tous les Leads par batch de 100
         $offset  = 0;
         $deleted = 0;
 
@@ -39,7 +39,7 @@ class VtigerDeleteAllAccounts extends Command
             $response = Http::withoutVerifying()->get($url, [
                 'operation'   => 'query',
                 'sessionName' => $session,
-                'query'       => "SELECT id FROM Accounts LIMIT $offset, 100;",
+                'query'       => "SELECT id FROM Leads LIMIT $offset, 100;",
             ]);
 
             $records = $response->json('result') ?? [];
@@ -65,6 +65,6 @@ class VtigerDeleteAllAccounts extends Command
         // 3. Remettre vtiger_id à null en base locale
         \App\Models\Partenaire::query()->update(['vtiger_id' => null]);
 
-        $this->info("$deleted comptes supprimés. vtiger_id remis à null.");
+        $this->info("$deleted prospects supprimés. vtiger_id remis à null.");
     }
 }

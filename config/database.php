@@ -114,6 +114,18 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'vtiger' => [
+            'driver'    => 'mysql',
+            'host'      => env('VTIGER_DB_HOST', '127.0.0.1'),
+            'port'      => env('VTIGER_DB_PORT', '3306'),
+            'database'  => env('VTIGER_DB_DATABASE', 'vtiger'),
+            'username'  => env('VTIGER_DB_USERNAME', 'vtiger_user'),
+            'password'  => env('VTIGER_DB_PASSWORD', ''),
+            'charset'   => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix'    => '',
+        ],
+
     ],
 
     /*
@@ -181,16 +193,5 @@ return [
 
     ],
 
-    'vtiger' => [
-        'driver'    => 'mysql',
-        'host'      => env('VTIGER_DB_HOST', '127.0.0.1'),
-        'port'      => env('VTIGER_DB_PORT', '3306'),
-        'database'  => env('VTIGER_DB_DATABASE', 'vtiger'),
-        'username'  => env('VTIGER_DB_USERNAME', 'vtiger_user'),
-        'password'  => env('VTIGER_DB_PASSWORD', ''),
-        'charset'   => 'utf8',
-        'collation' => 'utf8_unicode_ci',
-        'prefix'    => '',
-    ],
 
 ];

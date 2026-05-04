@@ -5,23 +5,24 @@ namespace App\Models;
 use App\Enums\ContactStatut;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contact extends Model
 {
     use HasFactory, SoftDeletes;
 
-protected $fillable = [
-    'partenaire_id',
-    'conseiller_nom',
-    'conseiller_prenom',
-    'statut',
-    'date_premier_contact',
-    'commentaires',
-    'poste',
-    'tel',
-    'vtiger_id',
-];
+    protected $fillable = [
+        'partenaire_id',
+        'conseiller_nom',
+        'conseiller_prenom',
+        'statut',
+        'date_premier_contact',
+        'commentaires',
+        'poste',
+        'tel',
+        'vtiger_id',
+    ];
 
     protected $casts = [
         'date_premier_contact' => 'date',
@@ -38,8 +39,8 @@ protected $fillable = [
         return null;
     }
 
-    public function partenaire()
-    {
-        return $this->belongsTo(Partenaire::class);
-    }
+ public function partenaires(): BelongsToMany
+{
+    return $this->belongsToMany(Partenaire::class, 'contact_partenaire');
+}
 }

@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('ca', 15, 2)->nullable();
             $table->string('siret', 20)->nullable()->unique();
              $table->string('statut')
-                  ->default(PartenaireStatut::A_PROSPECTER->value);
+                  ->default(PartenaireStatut::A_CONTACTER->value);
             $table->timestamps();
              $table->softDeletes();
         });

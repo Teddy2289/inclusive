@@ -15,6 +15,210 @@
   flex-wrap: wrap;
   gap: .75rem;
 }
+/* Styles à ajouter */
+.partenaires-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: .5rem;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .82rem;
+  color: #374151;
+  transition: background .15s;
+}
+
+.partenaires-list {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+/* Badge partenaires cliquable */
+.badge-partenaires {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: #e0f2fe;
+  color: #0284c7;
+  border: none;
+  border-radius: 999px;
+  padding: .28rem .75rem;
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, transform .15s;
+}
+.badge-partenaires:hover {
+  background: #bae6fd;
+  transform: translateY(-1px);
+}
+.badge-ico {
+  width: .8rem;
+  height: .8rem;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+/* Modal partenaires */
+.modal-part {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 780px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-part-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.modal-part-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+
+.modal-part-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  background: #e0f2fe;
+  color: #0284c7;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.modal-part-icon svg { width: 1.1rem; height: 1.1rem; }
+
+.modal-part-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 .1rem;
+}
+.modal-part-sub {
+  font-size: .73rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Liste */
+.part-list {
+  list-style: none;
+  margin: 0;
+  padding: .75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.part-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .65rem .85rem;
+  border-radius: 10px;
+  border: 1px solid #f1f5f9;
+  background: #fafafa;
+  transition: background .15s, border-color .15s;
+}
+.part-item:hover {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.part-item-left {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.part-avatar {
+  width: 2rem;
+  height: 2rem;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.part-name {
+  font-size: .83rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-decoration: none;
+  display: block;
+}
+.part-name:hover { color: #0284c7; }
+
+.part-ville {
+  font-size: .72rem;
+  color: #94a3b8;
+  margin: .1rem 0 0;
+}
+
+.part-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: #e0f2fe;
+  color: #0284c7;
+  border-radius: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.part-link-btn:hover { background: #bae6fd; }
+.part-link-btn svg { width: .85rem; height: .85rem; }
+
+.check-item:hover { background: #f1f5f9; }
+.check-item.selected { background: #e0f2fe; color: #0284c7; font-weight: 600; }
+
+.check-input { accent-color: #0284c7; width: 1rem; height: 1rem; }
+.part-ico { width: .85rem; height: .85rem; flex-shrink: 0; }
+.loading-inline { font-size: .8rem; color: #94a3b8; padding: .5rem; }
 .page-title {
   font-size: 1.35rem;
   font-weight: 700;

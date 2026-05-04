@@ -39,7 +39,7 @@
                             <input v-model="form.conseiller_prenom" class="input"
                                 :class="{ 'input-error': errors.conseiller_prenom }" placeholder="Jean" />
                             <span v-if="errors.conseiller_prenom" class="field-error">{{ errors.conseiller_prenom[0]
-                                }}</span>
+                            }}</span>
                         </div>
                         <div class="form-group">
                             <label class="field-label">Fonction</label>
@@ -71,39 +71,33 @@
                 </div>
 
                 <!-- Section : Partenaire — affiché seulement si pas de partenaireId fixe -->
-                <div class="form-section" v-if="needsPartenaireSelect || isEdit">
-                    <div class="section-label">Partenaire</div>
+                <!-- Section Partenaires — remplace l'ancien select simple -->
+                <div class="form-section">
+                    <div class="section-label">Partenaires liés</div>
                     <div class="form-group">
                         <label class="field-label">
-                            Partenaire <span class="required">*</span>
+                            Partenaires <span class="required">*</span>
                         </label>
 
-                        <!-- En édition : afficher le partenaire actuel en lecture seule -->
-                        <div v-if="isEdit && !needsPartenaireSelect" class="partenaire-readonly">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"
-                                class="part-ico">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18" />
-                            </svg>
-                            {{ props.contact?.partenaire?.raison_sociale ?? '—' }}
+                        <div v-if="loadingPart" class="loading-inline">Chargement...</div>
+
+                        <!-- Liste de cases à cocher -->
+                        <div v-else class="partenaires-checklist">
+                            <label v-for="p in partenaires" :key="p.id" class="check-item"
+                                :class="{ selected: form.partenaire_ids.includes(p.id) }">
+                                <input type="checkbox" :value="p.id" v-model="form.partenaire_ids"
+                                    class="check-input" />
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"
+                                    class="part-ico">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18" />
+                                </svg>
+                                {{ p.raison_sociale }}
+                            </label>
                         </div>
 
-                        <!-- En création depuis liste globale : select -->
-                        <div v-else class="select-wrapper">
-                            <select v-model="form.partenaire_id" class="input"
-                                :class="{ 'input-error': errors.partenaire_id }" :disabled="loadingPart">
-                                <option :value="null" disabled>
-                                    {{ loadingPart ? 'Chargement...' : '— Sélectionner un partenaire —' }}
-                                </option>
-                                <option v-for="p in partenaires" :key="p.id" :value="p.id">
-                                    {{ p.raison_sociale }}
-                                </option>
-                            </select>
-
-                        </div>
-
-                        <span v-if="errors.partenaire_id" class="field-error">
-                            {{ errors.partenaire_id[0] }}
+                        <span v-if="errors.partenaire_ids" class="field-error">
+                            {{ errors.partenaire_ids[0] }}
                         </span>
                     </div>
                 </div>
@@ -200,20 +194,21 @@ const form = reactive<ContactForm>({
     date_premier_contact: props.contact?.date_premier_contact ?? '',
     commentaires: props.contact?.commentaires ?? '',
     statut: props.contact?.statut?.value ?? '',
-    partenaire_id: props.contact?.partenaire_id ?? props.partenaireId ?? null,
+     partenaire_ids: props.contact?.partenaires?.map(p => p.id)
+    ?? (props.partenaireId ? [props.partenaireId] : []),
 })
 
 onMounted(async () => {
-    if (needsPartenaireSelect.value) {
-        loadingPart.value = true
-        try {
-            // Charger tous les partenaires pour le select (sans pagination)
-            const result = await partenaireService.list({ per_page: 999 })
-            partenaires.value = result.data.map(p => ({ id: p.id, raison_sociale: p.raison_sociale }))
-        } finally {
-            loadingPart.value = false
-        }
-    }
+  loadingPart.value = true
+  try {
+    const result = await partenaireService.list({ per_page: 999 })
+    partenaires.value = result.data.map(p => ({
+      id: p.id,
+      raison_sociale: p.raison_sociale,
+    }))
+  } finally {
+    loadingPart.value = false
+  }
 })
 
 async function handleSubmit(): Promise<void> {
@@ -228,7 +223,7 @@ async function handleSubmit(): Promise<void> {
         }
 
         emit('saved')
-          router.reload()
+        router.reload()
     } catch (e: any) {
         if (e.response?.status === 422) {
             errors.value = e.response.data.errors ?? {}

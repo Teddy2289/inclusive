@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 class ContactController extends Controller
 {
 
- use AuthorizesRequests;
+    use AuthorizesRequests;
     public function __construct(
         private readonly StatutService $statutService
     ) {}
@@ -24,16 +24,17 @@ class ContactController extends Controller
     {
         $this->authorize('viewAny', Contact::class);
 
-        $contacts = Contact::with('partenaire')
-            ->when($request->partenaire_id, fn($q) =>
-                $q->where('partenaire_id', $request->partenaire_id)
+        $contacts = Contact::with('partenaires')
+            ->when(
+                $request->partenaire_id,
+                fn($q) => $q->whereHas(
+                    'partenaires',
+                    fn($q2) => $q2->where('partenaires.id', $request->partenaire_id)
+                )
             )
-            ->when($request->statut, fn($q) =>
-                $q->where('statut', $request->statut)
-            )
-            ->latest()
             ->paginate($request->get('per_page', 15));
 
+        // ✅ collection() pour les listes paginées, pas new ContactResource()
         return ContactResource::collection($contacts)->response();
     }
 
@@ -41,27 +42,38 @@ class ContactController extends Controller
     {
         $this->authorize('create', Contact::class);
 
-        $contact = Contact::create($request->validated());
+        $data = $request->validated();
+        $partenaireIds = $data['partenaire_ids'];
+        unset($data['partenaire_ids']);
 
-        return (new ContactResource($contact->load('partenaire')))
-            ->response()
-            ->setStatusCode(201);
+        $contact = Contact::create($data);
+        $contact->partenaires()->sync($partenaireIds);
+
+        return (new ContactResource($contact->load('partenaires')))
+            ->response()->setStatusCode(201);
     }
-
     public function show(Contact $contact): JsonResponse
     {
         $this->authorize('view', $contact);
 
-        return (new ContactResource($contact->load('partenaire')))->response();
+        return (new ContactResource($contact->load('partenaires')))->response();
     }
 
     public function update(UpdateContactRequest $request, Contact $contact): JsonResponse
     {
         $this->authorize('update', $contact);
 
-        $contact->update($request->validated());
+        $data = $request->validated();
+        $partenaireIds = $data['partenaire_ids'] ?? null;
+        unset($data['partenaire_ids']);
 
-        return (new ContactResource($contact->fresh('partenaire')))->response();
+        $contact->update($data);
+
+        if ($partenaireIds !== null) {
+            $contact->partenaires()->sync($partenaireIds);
+        }
+
+        return (new ContactResource($contact->fresh('partenaires')))->response();
     }
 
     public function destroy(Contact $contact): JsonResponse

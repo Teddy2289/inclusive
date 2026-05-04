@@ -8,12 +8,15 @@ use Illuminate\Validation\Rules\Enum;
 
 class StoreContactRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     public function rules(): array
     {
         return [
-            'partenaire_id'        => 'required|exists:partenaires,id',
+            'partenaire_ids.*'     => 'exists:partenaires,id',
             'conseiller_nom'       => 'nullable|string|max:100',
             'conseiller_prenom'    => 'nullable|string|max:100',
             'statut'               => ['nullable', new Enum(ContactStatut::class)],

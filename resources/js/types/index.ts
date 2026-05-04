@@ -43,7 +43,7 @@ export interface Contact {
     fonction: string | null;
     date_rdv: string | null;
     heure_rdv: string | null;
-    partenaire?: Partenaire;
+    partenaires?: Partenaire[];
 }
 
 export interface PaginationLink {
@@ -104,7 +104,7 @@ export interface ContactForm {
     date_premier_contact: string | null;
     commentaires: string | null;
     statut: string;
-    partenaire_id: number | null;
+     partenaire_ids: number[]
 }
 
 export interface Role {

@@ -25,7 +25,7 @@ export const contactService = {
     return data.data
   },
 
-  async update(id: number, payload: ContactForm): Promise<Contact>  {
+  async update(id: number, payload: ContactForm): Promise<Contact> {
     const { data } = await api.put(`/contacts/${id}`, payload)
     return data.data
   },

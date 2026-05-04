@@ -5,6 +5,7 @@ namespace App\Enums;
 enum PartenaireStatut: string
 {
     case A_CONTACTER        = 'a_contacter';
+    case A_PROSPECTER      = 'a_prospecter';
     case EN_PROSPECTION     = 'en_prospection';
     case PROSPECT_COMMERCIAL = 'prospect_avec_commercial';
     case PLANIFIE           = 'planifie';
@@ -15,8 +16,9 @@ enum PartenaireStatut: string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::A_CONTACTER        => 'À contacter',
+            self::A_PROSPECTER       => 'À prospecter',
             self::EN_PROSPECTION      => 'En prospection',
             self::PROSPECT_COMMERCIAL => 'Prospect avec commercial',
             self::PLANIFIE            => 'Planifié',
@@ -29,8 +31,9 @@ enum PartenaireStatut: string
      */
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::A_CONTACTER        => 'gray',
+            self::A_PROSPECTER       => 'gray',
             self::EN_PROSPECTION      => 'blue',
             self::PROSPECT_COMMERCIAL => 'purple',
             self::PLANIFIE            => 'yellow',
@@ -43,12 +46,13 @@ enum PartenaireStatut: string
      */
     public function transitionsAutorisees(): array
     {
-        return match($this) {
+        return match ($this) {
             self::A_CONTACTER        => [self::EN_PROSPECTION],
+            self::A_PROSPECTER       => [self::EN_PROSPECTION],
             self::EN_PROSPECTION      => [self::PROSPECT_COMMERCIAL, self::DESACTIVE],
             self::PROSPECT_COMMERCIAL => [self::PLANIFIE, self::DESACTIVE],
             self::PLANIFIE            => [self::DESACTIVE],
-            self::DESACTIVE           => [self::A_CONTACTER], // réactivation possible
+            self::DESACTIVE           => [self::A_CONTACTER],
         };
     }
 

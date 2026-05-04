@@ -75,14 +75,22 @@ class PartenairesImport implements ToCollection
 
             if ($hasConseiller || $hasEtat) {
                 $conseiller = $this->parseConseiller($row[$map['conseiller'] ?? 0] ?? null);
-                Contact::create([
-                    'partenaire_id'        => $partenaire->id,
-                    'conseiller_nom'       => $conseiller['nom'],
-                    'conseiller_prenom'    => $conseiller['prenom'],
-                    'statut'               => $row[$map['etat'] ?? 1] ?? ContactStatut::A_CONTACTER->value,
-                    'date_premier_contact' => $this->parseDate($row[$map['date'] ?? 2] ?? null),
-                    'commentaires'         => $row[$map['commentaires'] ?? 3] ?? null,
-                ]);
+
+                // Chercher un contact existant avec ce conseiller, ou en créer un seul
+                $contact = Contact::firstOrCreate(
+                    [
+                        'conseiller_nom'    => $conseiller['nom'],
+                        'conseiller_prenom' => $conseiller['prenom'],
+                    ],
+                    [
+                        'statut'               => $row[$map['etat'] ?? 1] ?? ContactStatut::A_CONTACTER->value,
+                        'date_premier_contact' => $this->parseDate($row[$map['date'] ?? 2] ?? null),
+                        'commentaires'         => $row[$map['commentaires'] ?? 3] ?? null,
+                    ]
+                );
+
+                // Attacher le partenaire sans créer de doublon
+                $contact->partenaires()->syncWithoutDetaching([$partenaire->id]);
             }
 
             \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();

@@ -19,15 +19,15 @@ return new class extends Migration
             $table->string('cp', 10)->nullable();
             $table->string('ville')->nullable();
             $table->integer('nbrs_salaries')->nullable();
-            $table->string('secteur_activite')->nullable();
+            $table->text('secteur_activite')->nullable();
             $table->string('telephone_1', 20)->nullable();
             $table->string('telephone_2', 20)->nullable();
             $table->decimal('ca', 15, 2)->nullable();
             $table->string('siret', 20)->nullable()->unique();
-             $table->string('statut')
-                  ->default(PartenaireStatut::A_CONTACTER->value);
+            $table->string('statut')
+                ->default(PartenaireStatut::A_CONTACTER->value);
             $table->timestamps();
-             $table->softDeletes();
+            $table->softDeletes();
         });
     }
 

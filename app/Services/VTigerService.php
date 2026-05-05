@@ -46,22 +46,24 @@ class VTigerService
 
         $element = json_encode([
             // ─── Champs obligatoires ───────────────
-            'lastname'         => $data['raison_sociale'],   // Nom (obligatoire)
-            'company'          => $data['raison_sociale'],   // Société
+            'lastname'         => $data['raison_sociale'],
+            'company'          => $data['raison_sociale'],
             'assigned_user_id' => '19x1',
 
             // ─── Coordonnées ──────────────────────
-            'phone'            => $data['telephone_1']      ?? '',
-            'mobile'           => $data['telephone_2']      ?? '',
+            'phone'  => preg_replace('/\s+/', '', $data['telephone_1'] ?? ''),
+            'mobile' => preg_replace('/\s+/', '', $data['telephone_2'] ?? ''),
             'lane'             => $data['adresse']          ?? '',
             'code'             => $data['cp']               ?? '',
             'city'             => $data['ville']            ?? '',
             'country'          => 'France',
 
             // ─── Infos entreprise ─────────────────
-            'noofemployees'    => $data['nbrs_salaries']    ?? '',
-            'annualrevenue'    => $data['ca']               ?? '',
-            'description'      => $data['secteur_activite'] ?? '',
+            'noofemployees' => !empty($data['nbrs_salaries']) ? (int)$data['nbrs_salaries'] : null,
+
+            'annualrevenue' => !empty($data['ca'])            ? (float)$data['ca']          : null,
+
+            'industry'      => $data['secteur_activite'] ?? '',
 
             // ─── Statut par défaut ─────────────────
             'leadstatus'       => 'A contacter',
@@ -112,7 +114,7 @@ class VTigerService
 
         $element = json_encode([
             'id'               => $vtigerId,
-            'lastname'         => $existing['lastname'],
+            'lastname'         => $existing['raison_sociale'] ?? 'Inconnu',
             'leadstatus'       => 'Hors Cible - Refus',   // ← statut désactivé
             'rating'           => 'Shutdown',
             'assigned_user_id' => $existing['assigned_user_id'],

@@ -93,7 +93,7 @@ class PartenairesImport implements ToCollection
                 $contact->partenaires()->syncWithoutDetaching([$partenaire->id]);
             }
 
-            \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
+            // \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
         }
     }
 
@@ -114,16 +114,16 @@ class PartenairesImport implements ToCollection
         $commentaires = $find(['COMMENT', 'SITUATION']) !== false ? $find(['COMMENT', 'SITUATION']) : 3;
 
         // Colonnes droite (infos entreprise)
-        $raison   = $find(['RAISON', 'SOCIALE'])                       ?: 4;
-        $adresse  = $find(['ADRESSE'])                                  ?: 5;
-        $cp       = $find(['CP', 'CODE POSTAL'])                       ?: 6;
-        $ville    = $find(['VILLE'])                                    ?: 7;
-        $tel1     = $find(['TÉLÉPHONE 1', 'TELEPHONE 1', 'TEL 1', 'TEL1']) ?: 8;
-        $tel2     = $find(['TÉLÉPHONE 2', 'TELEPHONE 2', 'TEL 2', 'TEL2']) ?: 9;
-        $salaries = $find(['SALARI', 'NBRS', 'NBRE'])                  ?: 10;
-        $secteur  = $find(['SECTEUR'])                                  ?: 11;
-        $siret    = $find(['SIRET'])                                    ?: 12;
-        $ca       = $find(['CA', 'CHIFFRE'])                           ?: 13;
+        $raison   = ($r = $find(['RAISON', 'SOCIALE']))   !== false ? $r : 4;
+        $adresse  = ($r = $find(['ADRESSE']))             !== false ? $r : 5;
+        $cp       = ($r = $find(['CP', 'CODE POSTAL']))   !== false ? $r : 6;
+        $ville    = ($r = $find(['VILLE']))               !== false ? $r : 7;
+        $tel1 = ($r = $find(['TÉLÉPHONE 1', 'TELEPHONE 1', 'TEL 1', 'TEL1', 'TÉL. 1', 'TÉL'])) !== false ? $r : 8;
+        $tel2     = ($r = $find(['TÉLÉPHONE 2', 'TELEPHONE 2', 'TEL 2', 'TEL2'])) !== false ? $r : 9;
+        $salaries = ($r = $find(['SALARI', 'NBRS', 'NBRE']))  !== false ? $r : 10;
+        $secteur  = ($r = $find(['SECTEUR']))             !== false ? $r : 11;
+        $siret    = ($r = $find(['SIRET']))               !== false ? $r : 12;
+        $ca       = ($r = $find(['CA', 'CHIFFRE']))       !== false ? $r : 13;
 
         return compact(
             'conseiller',
@@ -166,7 +166,7 @@ class PartenairesImport implements ToCollection
     private function parseConseiller($value): array
     {
         $parts = explode(' ', trim($value ?? ''), 2);
-        return ['prenom' => $parts[0] ?? null, 'nom' => $parts[1] ?? null];
+        return ['nom' => $parts[0] ?? null, 'prenom' => $parts[1] ?? null];
     }
 
     private function parseDate($value): ?string

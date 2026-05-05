@@ -146,7 +146,7 @@ async function handleLogin(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f38945;
+  background: #071e33;
   padding: 1rem;
 }
 
@@ -163,7 +163,7 @@ async function handleLogin(): Promise<void> {
 /* Section Branding */
 .brand-section {
   flex: 1;
-  background:#cacaca;
+  background:#ebebeb47;
   padding: 3rem;
   display: flex;
   align-items: center;

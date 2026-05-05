@@ -51,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Import Excel
     Route::post('/import', [ImportController::class, 'import']);
-
+    Route::get('/imports/history', [ImportController::class, 'history']);
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/dashboard/imports', [DashboardController::class, 'imports']);
     Route::get('/dashboard/sync-status', [DashboardController::class, 'syncStatus']);

@@ -176,10 +176,19 @@
                                 </svg>
                             </div>
                             <div class="import-info">
-                                <p class="import-name">{{ item.nomFichier }}</p>
-                                <p class="import-date">{{ formatDate(item.dateImport) }}</p>
+                                <p class="import-name">{{ item.original_filename }}</p>
+                                <p class="import-meta" v-if="item.status === 'success'">
+                                    {{ item.rows_imported }} lignes importées
+                                    <span v-if="item.rows_skipped > 0"> · {{ item.rows_skipped }} ignorées</span>
+                                </p>
+                                <p class="import-date">
+                                    {{ item.user?.name ?? 'Système' }} · {{ formatDate(item.created_at) }}
+                                </p>
+                                <p class="import-error" v-if="item.error_message">{{ item.error_message }}</p>
                             </div>
-                            <span class="status-pill" :class="'s-' + item.statut">{{ statusLabel(item.statut) }}</span>
+                            <span class="status-pill" :class="'s-' + item.status">
+                                {{ statusLabel(item.status) }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -250,15 +259,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { dashboardService } from '@/services/DashboardService'
-import type { DashboardStats, SyncStatus } from '@/services/DashboardService'
+import type { DashboardStats, ImportItem, SyncStatus } from '@/services/DashboardService'
 import { importService } from '@/services/importService'
 
-interface ImportItem {
-    id: number
-    nomFichier: string
-    dateImport: string
-    statut: string
-}
+
 
 interface Activity {
     id: number
@@ -287,6 +291,12 @@ const filteredActivities = computed(() =>
 async function loadStats(): Promise<void> {
     try {
         stats.value = await dashboardService.stats()
+    } catch { }
+}
+
+async function loadRecentImports(): Promise<void> {
+    try {
+        recentImports.value = await dashboardService.recentImports()
     } catch { }
 }
 
@@ -321,10 +331,7 @@ async function handleFileUpload(event: Event) {
         const response = await importService.importPartenaires(file)
         feedback.value = { message: response.message, type: 'success' }
 
-        recentImports.value.unshift({
-            id: Date.now(), nomFichier: file.name,
-            dateImport: new Date().toISOString(), statut: 'success',
-        })
+        await loadRecentImports()
         activities.value.unshift({
             id: Date.now(), type: 'import',
             message: `Import de ${file.name}`,
@@ -428,7 +435,7 @@ const statusLabel = (s: string) =>
 
 // ── Lifecycle ─────────────────────────────────────
 onMounted(async () => {
-    await Promise.all([loadStats(), loadSyncStatus()])
+    await Promise.all([loadStats(), loadSyncStatus(), loadRecentImports()])
     // Si des jobs sont en attente au chargement, on poll
     if (syncStatus.value && syncStatus.value.pending > 0) startPolling()
 })

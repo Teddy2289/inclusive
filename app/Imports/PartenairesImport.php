@@ -4,96 +4,120 @@ namespace App\Imports;
 
 use App\Enums\ContactStatut;
 use App\Models\Contact;
+use App\Models\Import;
 use App\Models\Partenaire;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
 class PartenairesImport implements ToCollection
 {
+
+    private Import $importRecord;
+    private int $rowsImported = 0;
+    private int $rowsSkipped  = 0;
+
+    public function __construct(Import $importRecord)
+    {
+        $this->importRecord = $importRecord;
+    }
     public function collection(Collection $rows)
     {
-        // Chercher la ligne d'en-tête — soit avec RAISON col 4, soit avec RAISON col E
-        $header = $rows->first(
-            fn($row) =>
-            collect($row)->contains(
-                fn($val) =>
-                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
-            )
-        );
-
-        if (!$header) return;
-
-        $map = $this->mapColumns($header);
-
-        foreach ($rows as $row) {
-            // Sauter les lignes d'en-tête
-            if (collect($row)->contains(
-                fn($val) =>
-                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
-            )) {
-                continue;
-            }
-
-            // Sauter les lignes de titre fusionné type "Infos générales"
-            if (collect($row)->contains(
-                fn($val) =>
-                str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'INFOS') ||
-                    str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'GÉNÉRAL')
-            )) {
-                continue;
-            }
-
-            // Sauter si pas de raison sociale
-            if (empty($row[$map['raison']])) {
-                continue;
-            }
-
-            // Sauter si colonne Etat contient le titre
-            if (isset($row[$map['etat']]) && in_array($row[$map['etat']], ['Etat', 'statut', 'État'])) {
-                continue;
-            }
-
-            $siret = $this->cleanSiret($row[$map['siret']] ?? null);
-            $partenaire = Partenaire::updateOrCreate(
-                ['siret' => $siret],
-                [
-                    'raison_sociale'   => $this->truncate($row[$map['raison']] ?? null, 255),
-                    'adresse'          => $this->truncate($row[$map['adresse']] ?? null, 255),
-                    'cp'               => $this->truncate($row[$map['cp']] ?? null, 10),
-                    'ville'            => $this->truncate($row[$map['ville']] ?? null, 255),
-                    'nbrs_salaries'    => $this->toNum($row[$map['salaries']] ?? null),
-                    'secteur_activite' => $this->truncate($row[$map['secteur']] ?? null, 255),
-                    'telephone_1'      => $this->truncate($row[$map['tel1']] ?? null, 20),
-                    'telephone_2'      => $this->truncate($row[$map['tel2']] ?? null, 20),
-                    'ca'               => $this->toNum($row[$map['ca']] ?? null),
-                ]
+        try {
+            // Chercher la ligne d'en-tête — soit avec RAISON col 4, soit avec RAISON col E
+            $header = $rows->first(
+                fn($row) =>
+                collect($row)->contains(
+                    fn($val) =>
+                    str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
+                )
             );
 
-            // Créer le contact si conseiller ou etat présent
-            $hasConseiller = !empty($row[$map['conseiller'] ?? 0]);
-            $hasEtat       = !empty($row[$map['etat'] ?? 1]);
+            if (!$header) return;
 
-            if ($hasConseiller || $hasEtat) {
-                $conseiller = $this->parseConseiller($row[$map['conseiller'] ?? 0] ?? null);
+            $map = $this->mapColumns($header);
 
-                // Chercher un contact existant avec ce conseiller, ou en créer un seul
-                $contact = Contact::firstOrCreate(
+            foreach ($rows as $row) {
+                // Sauter les lignes d'en-tête
+                if (collect($row)->contains(
+                    fn($val) =>
+                    str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'RAISON')
+                )) {
+                    continue;
+                }
+
+                // Sauter les lignes de titre fusionné type "Infos générales"
+                if (collect($row)->contains(
+                    fn($val) =>
+                    str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'INFOS') ||
+                        str_contains(mb_strtoupper((string)$val, 'UTF-8'), 'GÉNÉRAL')
+                )) {
+                    continue;
+                }
+
+                // Sauter si pas de raison sociale
+                if (empty($row[$map['raison']])) {
+                    continue;
+                }
+
+                // Sauter si colonne Etat contient le titre
+                if (isset($row[$map['etat']]) && in_array($row[$map['etat']], ['Etat', 'statut', 'État'])) {
+                    continue;
+                }
+
+                $siret = $this->cleanSiret($row[$map['siret']] ?? null);
+                $partenaire = Partenaire::updateOrCreate(
+                    ['siret' => $siret],
                     [
-                        'conseiller_nom'    => $conseiller['nom'],
-                        'conseiller_prenom' => $conseiller['prenom'],
-                    ],
-                    [
-                        'statut'               => $row[$map['etat'] ?? 1] ?? ContactStatut::A_CONTACTER->value,
-                        'date_premier_contact' => $this->parseDate($row[$map['date'] ?? 2] ?? null),
-                        'commentaires'         => $row[$map['commentaires'] ?? 3] ?? null,
+                        'raison_sociale'   => $this->truncate($row[$map['raison']] ?? null, 255),
+                        'adresse'          => $this->truncate($row[$map['adresse']] ?? null, 255),
+                        'cp'               => $this->truncate($row[$map['cp']] ?? null, 10),
+                        'ville'            => $this->truncate($row[$map['ville']] ?? null, 255),
+                        'nbrs_salaries'    => $this->toNum($row[$map['salaries']] ?? null),
+                        'secteur_activite' => $this->truncate($row[$map['secteur']] ?? null, 255),
+                        'telephone_1'      => $this->truncate($row[$map['tel1']] ?? null, 20),
+                        'telephone_2'      => $this->truncate($row[$map['tel2']] ?? null, 20),
+                        'ca'               => $this->toNum($row[$map['ca']] ?? null),
                     ]
                 );
 
-                // Attacher le partenaire sans créer de doublon
-                $contact->partenaires()->syncWithoutDetaching([$partenaire->id]);
-            }
+                // Créer le contact si conseiller ou etat présent
+                $hasConseiller = !empty($row[$map['conseiller'] ?? 0]);
+                $hasEtat       = !empty($row[$map['etat'] ?? 1]);
 
-            // \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
+                if ($hasConseiller || $hasEtat) {
+                    $conseiller = $this->parseConseiller($row[$map['conseiller'] ?? 0] ?? null);
+
+                    // Chercher un contact existant avec ce conseiller, ou en créer un seul
+                    $contact = Contact::firstOrCreate(
+                        [
+                            'conseiller_nom'    => $conseiller['nom'],
+                            'conseiller_prenom' => $conseiller['prenom'],
+                        ],
+                        [
+                            'statut'               => $row[$map['etat'] ?? 1] ?? ContactStatut::A_CONTACTER->value,
+                            'date_premier_contact' => $this->parseDate($row[$map['date'] ?? 2] ?? null),
+                            'commentaires'         => $row[$map['commentaires'] ?? 3] ?? null,
+                        ]
+                    );
+
+                    // Attacher le partenaire sans créer de doublon
+                    $contact->partenaires()->syncWithoutDetaching([$partenaire->id]);
+                }
+
+                // \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
+            }
+            $this->importRecord->update([
+                'status'        => 'success',
+                'rows_imported' => $this->rowsImported,
+                'rows_skipped'  => $this->rowsSkipped,
+            ]);
+        } catch (\Exception $e) {
+            $this->importRecord->update([
+                'status'        => 'failed',
+                'error_message' => $e->getMessage(),
+                'rows_imported' => $this->rowsImported,
+            ]);
+            throw $e;
         }
     }
 

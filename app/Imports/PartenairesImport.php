@@ -104,7 +104,7 @@ class PartenairesImport implements ToCollection
                     $contact->partenaires()->syncWithoutDetaching([$partenaire->id]);
                 }
 
-                // \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
+                \App\Jobs\SyncToVTiger::dispatch($partenaire)->afterCommit();
             }
             $this->importRecord->update([
                 'status'        => 'success',

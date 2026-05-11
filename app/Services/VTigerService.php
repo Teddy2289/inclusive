@@ -45,29 +45,32 @@ class VTigerService
         if (!$this->sessionName) $this->login();
 
         $element = json_encode([
-            // ─── Champs obligatoires ───────────────
+            // ─── Champs Standards ───────────────────
             'lastname'         => $data['raison_sociale'],
             'company'          => $data['raison_sociale'],
             'assigned_user_id' => '19x1',
-
-            // ─── Coordonnées ──────────────────────
-            'phone'  => preg_replace('/\s+/', '', $data['telephone_1'] ?? ''),
-            'mobile' => preg_replace('/\s+/', '', $data['telephone_2'] ?? ''),
-            'lane'             => $data['adresse']          ?? '',
-            'code'             => $data['cp']               ?? '',
-            'city'             => $data['ville']            ?? '',
+            'phone'            => preg_replace('/\s+/', '', $data['telephone_1'] ?? ''),
+            'mobile'           => preg_replace('/\s+/', '', $data['telephone_2'] ?? ''),
+            'lane'             => $data['adresse'] ?? '',
+            'code'             => $data['cp'] ?? '',
+            'city'             => $data['ville'] ?? '',
             'country'          => 'France',
-
-            // ─── Infos entreprise ─────────────────
-            'noofemployees' => !empty($data['nbrs_salaries']) ? (int)$data['nbrs_salaries'] : null,
-
-            'annualrevenue' => !empty($data['ca'])            ? (float)$data['ca']          : null,
-
-            'industry'      => $data['secteur_activite'] ?? '',
-
-            // ─── Statut par défaut ─────────────────
+            'noofemployees'    => !empty($data['nbrs_salaries']) ? (int)$data['nbrs_salaries'] : null,
+            'annualrevenue'    => !empty($data['ca']) ? (float)$data['ca'] : null,
+            'industry'         => $data['secteur_activite'] ?? '',
             'leadstatus'       => 'A contacter',
             'leadsource'       => 'Self Generated',
+
+            // ─── Nouveaux Champs Personnalisés (Custom Fields) ───
+            // Note : Assure-toi que les clés dans $data correspondent à ton import Excel
+            'cf_type_tiers'         => $data['type_tiers'] ?? 'Particulier',
+            'cf_type_entite_legale' => $data['forme_juridique'] ?? '',
+            'cf_nature_tiers'       => $data['nature_tiers'] ?? 'Client',
+            'cf_potentiel_prospect' => $data['potentiel'] ?? '',
+            'cf_statut_prospection' => $data['statut_prospection'] ?? 'Nouveau',
+            'cf_origine_contact'    => $data['origine'] ?? 'Fichier Excel',
+            'cf_statut_sirene'      => $data['statut_sirene'] ?? 'Actif',
+            'siccode'               => $data['siret'] ?? '', // Le SIRET est souvent mis dans siccode
         ]);
 
         $response = Http::withoutVerifying()->asForm()->post($this->url, [
@@ -82,7 +85,6 @@ class VTigerService
 
         return $result['result'] ?? [];
     }
-
     public function findLeadByName(string $name): ?string
     {
         if (!$this->sessionName) $this->login();
@@ -138,20 +140,15 @@ class VTigerService
         if (!$this->sessionName) $this->login();
 
         $offset = ($page - 1) * $limit;
+        $whereClause = !empty($search) ? "WHERE accountname LIKE '%" . addslashes($search) . "%'" : "";
 
-        $whereClause = '';
-        if (!empty($search)) {
-            $search = addslashes($search);
-            $whereClause = "WHERE accountname LIKE '%{$search}%'";
-        }
-
-        $query = "SELECT id, accountname, phone, bill_city, bill_code,
-                     industry, employees, annual_revenue, accounttype,
-                     statut_prospect, siccode
-              FROM Accounts
-              {$whereClause}
-              ORDER BY accountname ASC
-              LIMIT {$offset}, {$limit};";
+        // Ajout des cf_ dans la requête SELECT si tu transformes tes Leads en Comptes plus tard
+        $query = "SELECT id, accountname, phone, bill_city,
+                         cf_type_tiers, cf_statut_prospection
+                  FROM Accounts
+                  {$whereClause}
+                  ORDER BY accountname ASC
+                  LIMIT {$offset}, {$limit};";
 
         $response = Http::withoutVerifying()->get($this->url, [
             'operation'   => 'query',
@@ -159,10 +156,7 @@ class VTigerService
             'query'       => $query,
         ]);
 
-        $result = $response->json();
-        Log::info('vTiger getAccounts', ['success' => $result['success'] ?? false]);
-
-        return $result['result'] ?? [];
+        return $response->json('result') ?? [];
     }
 
     // Méthode pour compter le total des comptes (pour la pagination)
@@ -198,6 +192,7 @@ class VTigerService
         DB::connection('vtiger')->table('vtiger_leaddetails')->delete();
         DB::connection('vtiger')->table('vtiger_leadscf')->delete();
         DB::connection('vtiger')->table('vtiger_leadsubdetails')->delete();
+        DB::table('vtiger_leadscf')->delete();
         DB::connection('vtiger')->table('vtiger_crmentity')->where('setype', 'Leads')->delete();
         DB::connection('vtiger')->statement('SET FOREIGN_KEY_CHECKS = 1');
 

@@ -35,6 +35,7 @@ class SyncToVTiger implements ShouldQueue
             $leadId = $existingId;
         } else {
             $lead = $vtiger->createLead([
+                // ─── Champs de base ─────────────────────────────
                 'raison_sociale'   => $this->partenaire->raison_sociale,
                 'adresse'          => $this->partenaire->adresse,
                 'cp'               => $this->partenaire->cp,
@@ -44,6 +45,9 @@ class SyncToVTiger implements ShouldQueue
                 'nbrs_salaries'    => $this->partenaire->nbrs_salaries,
                 'secteur_activite' => $this->partenaire->secteur_activite,
                 'ca'               => $this->partenaire->ca,
+
+                // ─── SIRET / SIREN / Code Client ────────────────
+                'siret'            => $this->partenaire->siret,      // calcul SIREN fait dans VTigerService
             ]);
 
             if (!isset($lead['id'])) {

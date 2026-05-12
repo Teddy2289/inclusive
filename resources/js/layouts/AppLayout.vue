@@ -14,7 +14,9 @@
 
             <!-- Logo -->
             <div class="sidebar__logo">
-               <img :src="logo" alt="Logo" class="logo-icon" />
+                <div class="logo-text">
+                    <span class="text-xl">Gestion de Partenaires</span>
+                </div>
             </div>
 
             <!-- Navigation -->

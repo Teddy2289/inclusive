@@ -44,33 +44,62 @@ class VTigerService
     {
         if (!$this->sessionName) $this->login();
 
+        // Calcul SIREN et Code Client depuis le SIRET
+        $siret      = preg_replace('/[^0-9]/', '', $data['siret'] ?? '');
+        $siren      = strlen($siret) >= 9 ? substr($siret, 0, 9) : null;
+        $cp         = preg_replace('/\s+/', '', $data['cp'] ?? '');
+        $codeClient = ($siren && $cp) ? $siren . $cp : null;
+
         $element = json_encode([
-            // ─── Champs Standards ───────────────────
+            // ─── Champs Standards ───────────────────────────────────────
             'lastname'         => $data['raison_sociale'],
+            'firstname'        => $data['nom_alternatif'] ?? '',            // Nom alternatif
             'company'          => $data['raison_sociale'],
             'assigned_user_id' => '19x1',
             'phone'            => preg_replace('/\s+/', '', $data['telephone_1'] ?? ''),
             'mobile'           => preg_replace('/\s+/', '', $data['telephone_2'] ?? ''),
             'lane'             => $data['adresse'] ?? '',
-            'code'             => $data['cp'] ?? '',
+            'code'             => $cp,
             'city'             => $data['ville'] ?? '',
             'country'          => 'France',
             'noofemployees'    => !empty($data['nbrs_salaries']) ? (int)$data['nbrs_salaries'] : null,
             'annualrevenue'    => !empty($data['ca']) ? (float)$data['ca'] : null,
             'industry'         => $data['secteur_activite'] ?? '',
             'leadstatus'       => 'A contacter',
-            'leadsource'       => 'Self Generated',
+            'leadsource'       => 'Auto Généré',
 
-            // ─── Nouveaux Champs Personnalisés (Custom Fields) ───
-            // Note : Assure-toi que les clés dans $data correspondent à ton import Excel
-            'cf_type_tiers'         => $data['type_tiers'] ?? 'Particulier',
-            'cf_type_entite_legale' => $data['forme_juridique'] ?? '',
-            'cf_nature_tiers'       => $data['nature_tiers'] ?? 'Client',
-            'cf_potentiel_prospect' => $data['potentiel'] ?? '',
+            // ─── Champs Personnalisés ────────────────────────────────────
+            'cf_code_client'        => $codeClient,                        // SIREN + CP
+            'cf_type_tiers'         => $data['type_tiers']        ?? 'Particulier',
+            'cf_type_entite_legale' => $data['forme_juridique']   ?? '',
+            'cf_nature_tiers'       => $data['nature_tiers']      ?? 'Client',
+            'cf_potentiel_prospect' => $data['potentiel']         ?? '',
             'cf_statut_prospection' => $data['statut_prospection'] ?? 'Nouveau',
-            'cf_origine_contact'    => $data['origine'] ?? 'Fichier Excel',
-            'cf_statut_sirene'      => $data['statut_sirene'] ?? 'Actif',
-            'siccode'               => $data['siret'] ?? '', // Le SIRET est souvent mis dans siccode
+            'cf_origine_contact'    => $data['origine']           ?? 'Fichier Excel',
+            'cf_statut_sirene'      => $data['statut_sirene']     ?? 'Actif',
+            'cf_nom_alternatif'     => $data['nom_alternatif']    ?? '',
+            'cf_region'             => $data['region']            ?? '',
+            'cf_commerciaux'        => $data['commerciaux']       ?? '',
+            'cf_interlocuteur'      => $data['interlocuteur']     ?? '',
+            'cf_vendu_par'          => $data['vendu_par']         ?? '',
+            'cf_maison_mere'        => $data['maison_mere']       ?? '',
+            'cf_salarie_de'         => $data['salarie_de']        ?? '',
+            'cf_suivi_client'       => $data['suivi_client']      ?? '',
+            'cf_a_recontacter'      => $data['a_recontacter']     ?? '0',
+            'cf_partenaire_boutique' => $data['partenaire_boutique'] ?? '0',
+            'cf_partenaire_like'    => $data['partenaire_like']   ?? '0',
+            'cf_convention_signee'  => $data['convention_signee'] ?? '0',
+            'cf_rgpd'               => $data['rgpd']              ?? '0',
+            'cf_ne_plus_contacter'  => $data['ne_plus_contacter'] ?? '0',
+            'cf_rqth'               => $data['rqth']              ?? '0',
+            'cf_opco'               => $data['opco']              ?? '',
+            'cf_inscrit_ft'         => $data['inscrit_ft']        ?? '0',
+            'cf_parrainage'         => $data['parrainage']        ?? '',
+            'cf_montant_cpf'        => !empty($data['montant_cpf']) ? (float)$data['montant_cpf'] : 0,
+            'cf_commentaires'       => $data['commentaires']      ?? '',
+            'cf_maj_sirene'         => '0',
+            'cf_statut_sirene'      => $data['statut_sirene']     ?? 'Actif',
+            'cf_id_import'          => $data['id_import']         ?? '',
         ]);
 
         $response = Http::withoutVerifying()->asForm()->post($this->url, [

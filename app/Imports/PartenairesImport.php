@@ -65,6 +65,9 @@ class PartenairesImport implements ToCollection
                 }
 
                 $siret = $this->cleanSiret($row[$map['siret']] ?? null);
+                $siren = $siret ? substr($siret, 0, 9) : null;
+                $cp    = $this->truncate($row[$map['cp']] ?? null, 10);
+                $codeClient = ($siren && $cp) ? $siren . $cp : null;
                 $partenaire = Partenaire::updateOrCreate(
                     ['siret' => $siret],
                     [
@@ -77,6 +80,8 @@ class PartenairesImport implements ToCollection
                         'telephone_1'      => $this->truncate($row[$map['tel1']] ?? null, 20),
                         'telephone_2'      => $this->truncate($row[$map['tel2']] ?? null, 20),
                         'ca'               => $this->toNum($row[$map['ca']] ?? null),
+                        'siren'            => $siren,
+                        'code_client'      => $codeClient,
                     ]
                 );
 

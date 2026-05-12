@@ -23,7 +23,9 @@ class Partenaire extends Model
         'ca',
         'siret',
         'statut',
-        'vtiger_id'
+        'vtiger_id',
+        'siren',
+        'code_client',
     ];
 
     protected $casts = [

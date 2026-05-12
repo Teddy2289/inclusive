@@ -215,14 +215,15 @@ class VTigerService
         // 1. Compter avant suppression
         $count = DB::connection('vtiger')->table('vtiger_leaddetails')->count();
 
-        // 2. Supprimer via SQL direct
+        // 2. Supprimer sur la bonne connexion vtiger
         DB::connection('vtiger')->statement('SET FOREIGN_KEY_CHECKS = 0');
+
         DB::connection('vtiger')->table('vtiger_leadaddress')->delete();
         DB::connection('vtiger')->table('vtiger_leaddetails')->delete();
-        DB::connection('vtiger')->table('vtiger_leadscf')->delete();
+        DB::connection('vtiger')->table('vtiger_leadscf')->delete();      // ← bonne connexion
         DB::connection('vtiger')->table('vtiger_leadsubdetails')->delete();
-        DB::table('vtiger_leadscf')->delete();
         DB::connection('vtiger')->table('vtiger_crmentity')->where('setype', 'Leads')->delete();
+
         DB::connection('vtiger')->statement('SET FOREIGN_KEY_CHECKS = 1');
 
         // 3. Remettre vtiger_id à null localement
